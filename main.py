@@ -10,12 +10,14 @@ def main():
     proxy = None
 
     token = os.environ["token"]
-
+    proxy=None
     if "dev" in os.environ:
         import logging
+        if "proxy" in os.environ:
+            proxy = os.environ["proxy"]
+            proxy = Request(proxy_url=proxy)
         logging.basicConfig(level=logging.DEBUG,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        proxy = Request(proxy_url='http://127.0.0.1:2081')
 
     bot = Bot(token=token, request=proxy)
 

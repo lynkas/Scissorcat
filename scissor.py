@@ -4,7 +4,7 @@ from collections import namedtuple
 from telegram import Document,File,Update,InputMediaPhoto
 import PIL.Image as Image
 
-chunk = 1024
+chunk = 2048
 
 
 class Job:
@@ -15,8 +15,6 @@ class Job:
             update_object.message.reply_text(f"the file is too large")
         else:
             self.file=file
-        # elif not file.mime_type.startswith("image/"):
-        #     update_object.message.reply_text(f"the file {file.file_name} is not an image ({file.mime_type})")
 
     def process(self):
         ba = self.file.download_as_bytearray()
@@ -27,7 +25,7 @@ class Job:
             message = self.update.message.reply_text("nothing to crop.")
         elif len(result)==1:
             imgIO = result[0]
-            message = self.update.message.reply_photo(imgIO)
+            message = self.update.message.reply_photo(imgIO,reply_to_message_id=self.update.message.message_id,)
             imgIO.close()
         else:
             message = self.update.message.bot.sendMediaGroup(
@@ -58,7 +56,7 @@ class Crop:
 
         self.size={"width":width,"height":height}
         self.crop_length = max(width, height)
-        if width>height:
+        if width>=height:
             self.direction = "width"
             self.another_direction = "height"
         else:

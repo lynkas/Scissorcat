@@ -1,7 +1,7 @@
 from queue import Queue,Empty
 from telegram import Document,PhotoSize
 from threading import Thread
-
+import logging
 from scissor import Job
 
 
@@ -33,22 +33,39 @@ class MessageHandler:
         while True:
             updates = self.bot.getUpdates(timeout=10, offset=self.offset + 1)
             if updates:
+                logging.debug(f"updates {len(updates)}")
+                for update in updates:
+                    logging.debug(update.message.__dict__)
+                    self.offset = max(update.update_id, self.offset)
                 Thread(target=self.update_processor,args=(updates,)).start()
 
     def update_processor(self,updates):
         for update in updates:
-            self.offset = max(update.update_id, self.offset)
             attachments = update.message.effective_attachment
             files = []
             if attachments:
+                logging.debug(f"have att")
+
                 if isinstance(attachments,Document):
-                    try:
-                        files.append(attachments.get_file(timeout=10))
-                    except:
-                        pass
+                    logging.debug(f"is document")
+                    if not attachments.mime_type.startswith("image/"):
+                        update.message.reply_text(f"the file {attachments.file_name} is not an image ({attachments.mime_type})")
+                    else:
+                        try:
+                            files.append(attachments.get_file(timeout=10))
+                            logging.warning(f"document got ")
+
+                        except:
+                            logging.debug(f"document got error")
+                            pass
                 if isinstance(attachments,list):
-                    for i in attachments:
+                    logging.debug(f"is list, {len(attachments)}")
+                    if len(attachments)!=0:
+                        i=attachments[-1]
                         if isinstance(i, PhotoSize):
+                            logging.debug(f"is photo")
                             files.append(i.get_file(timeout=10))
+                            logging.debug(f"photo got ")
+            logging.debug(f"total {len(files)} file")
             for file in files:
                 self.fileHandler.push(Job(file,update))
