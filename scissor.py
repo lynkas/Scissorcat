@@ -16,12 +16,13 @@ class Job:
         else:
             self.file = file
 
-    async def process(self):
+    def process(self):
         ba = self.file.download_as_bytearray()
         image = Image.open(io.BytesIO(ba))
         result = crop(image)
         image.close()
         size = len(result)
+        print(f"{size} image to be sent")
         if size == 0:
             message = self.update.message.reply_text("nothing to crop.")
         current = 0
@@ -48,6 +49,8 @@ class Job:
                     )
             size-=(stop-current)
             current=stop
+            print(f"sent {stop-current}")
+            print(f"remain {size}")
         for i in result:
             i.close()
 

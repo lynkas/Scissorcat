@@ -1,7 +1,7 @@
 from queue import Queue, Empty
 import logging,time
 from scissor import Job
-
+from threading import Thread
 class FHandler:
     def __init__(self):
         self._queue = Queue()
@@ -41,7 +41,7 @@ class FHandler:
         while self.working:
             try:
                 job = self._queue.get()
-                job.process()
+                Thread(target=job.process).start()
                 time.sleep(0.5)
             except Empty:
                 pass
