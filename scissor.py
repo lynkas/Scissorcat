@@ -39,14 +39,12 @@ class Job:
             i.close()
         return message
 
-
-
 def crop(image:Image):
     seg = Crop(*image.size)
     ret = []
     for coo in seg:
         output = io.BytesIO()
-        image.crop(coo).save(output, quality=80, format="png")
+        image.crop(coo).save(output, quality=95, format="png")
         output.seek(0)
         ret.append(output)
     return ret
@@ -71,7 +69,7 @@ class Crop:
 
     def __next__(self):
         remaining = self.size[self.direction]-self.position
-        if remaining <=0:
+        if remaining <= 0:
             raise StopIteration
         src = {"width":0,"height":0}
         to = {"width":0,"height":0}

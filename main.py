@@ -1,14 +1,15 @@
 from telegram.utils.request import Request
 from telegram import Update, Bot
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
 import os
-from handler import FileHandler, MessageHandler
+from handler import FHandler
 from threading import Thread
 
 
-def main():
-    proxy = None
 
+
+def main():
+    url=None
     token = os.environ["token"]
     proxy=None
     if "dev" in os.environ:
@@ -18,22 +19,27 @@ def main():
             proxy = Request(proxy_url=proxy)
         logging.basicConfig(level=logging.DEBUG,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        bot = Bot(token=token, request=proxy)
+        updater = Updater(token)
+    else:
+        url = os.environ["url"]
+        bot = Bot(token=token, request=proxy)
+        updater = Updater(bot=bot)
 
-    bot = Bot(token=token, request=proxy)
+    dispatcher = updater.dispatcher
+    fileHandler = FHandler()
 
-    fileHandler = FileHandler()
-    messageHandler = MessageHandler(bot,fileHandler)
+    dispatcher.add_handler(MessageHandler(Filters.photo, fileHandler.photoHandler()))
+    dispatcher.add_handler(MessageHandler(Filters.document,fileHandler.documentHandler()))
+    if "dev" in os.environ:
+        updater.start_polling()
 
-    works = []
-
-    works.append(Thread(target=fileHandler.work))
-    works.append(Thread(target=messageHandler.work))
-
-    for i in works:
-        i.start()
-    for i in works:
-        i.join()
-
+    else:
+        updater.bot.setWebhook(f"{url}/{token}")
+        updater.start_webhook(url_path=token)
+    Thread(target=fileHandler.work).start()
+    updater.idle()
 
 if __name__ == '__main__':
     main()
+
