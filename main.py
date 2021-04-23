@@ -14,7 +14,8 @@ import requests
 
 
 def registerWebhook(token,address):
-    requests.post(url=f"https://api.telegram.org/bot{token}/setWebhook",data={"url":address})
+    result =requests.post(url=f"https://api.telegram.org/bot{token}/setWebhook",data={"url":address})
+    assert result.status_code==200
 
 def main():
     url = None
