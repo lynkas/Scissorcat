@@ -42,6 +42,6 @@ class FHandler:
             try:
                 job = self._queue.get()
                 Thread(target=job.process).start()
-                time.sleep(0.5)
+                # time.sleep(0.5)
             except Empty:
                 pass
