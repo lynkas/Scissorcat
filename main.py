@@ -10,7 +10,11 @@ from telegram.ext import (
 import os
 from handler import FHandler
 from threading import Thread
+import requests
 
+
+def registerWebhook(token,address):
+    requests.post(url=f"https://api.telegram.org/bot{token}/setWebhook",data={"url":address})
 
 def main():
     url = None
@@ -45,7 +49,9 @@ def main():
 
     else:
         port = os.environ["port"]
-        updater.bot.setWebhook(f"{url}/{token}")
+        # fuck it
+        # updater.bot.setWebhook(url=f"{url}/{token}")
+        registerWebhook(token, f"{url}/{token}")
         updater.start_webhook(port=int(port),url_path=token)
     Thread(target=fileHandler.work).start()
     updater.idle()
