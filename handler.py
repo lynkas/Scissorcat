@@ -1,5 +1,5 @@
 from queue import Queue, Empty
-import logging
+import logging,time
 from scissor import Job
 
 class FHandler:
@@ -40,7 +40,8 @@ class FHandler:
         self.working = True
         while self.working:
             try:
-                job = self._queue.get(timeout=1)
+                job = self._queue.get()
                 job.process()
+                time.sleep(0.5)
             except Empty:
                 pass

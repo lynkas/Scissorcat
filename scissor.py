@@ -16,31 +16,40 @@ class Job:
         else:
             self.file = file
 
-    def process(self):
+    async def process(self):
         ba = self.file.download_as_bytearray()
         image = Image.open(io.BytesIO(ba))
         result = crop(image)
         image.close()
-        if len(result) == 0:
+        size = len(result)
+        if size == 0:
             message = self.update.message.reply_text("nothing to crop.")
-        elif len(result) == 1:
-            imgIO = result[0]
-            message = self.update.message.reply_photo(
-                imgIO,
-                reply_to_message_id=self.update.message.message_id,
-            )
-            imgIO.close()
-        else:
-            message = self.update.message.bot.sendMediaGroup(
-                chat_id=self.update.message.chat_id,
-                media=[InputMediaPhoto(i) for i in result],
-                reply_to_message_id=self.update.message.message_id,
-                allow_sending_without_reply=True,
-                timeout=10,
-            )
+        current = 0
+        while size > 0:
+            if size > 10:
+                stop = current + 10
+            else:
+                stop = current + size
+            if size == 1:
+                imgIO = result[0]
+                message = self.update.message.reply_photo(
+                    imgIO,
+                    reply_to_message_id=self.update.message.message_id,
+                )
+                imgIO.close()
+            else:
+                images = [InputMediaPhoto(i) for i in result[current:stop]]
+                message = self.update.message.bot.sendMediaGroup(
+                        chat_id=self.update.message.chat_id,
+                        media=images,
+                        reply_to_message_id=self.update.message.message_id,
+                        allow_sending_without_reply=True,
+                        timeout=10,
+                    )
+            size-=(stop-current)
+            current=stop
         for i in result:
             i.close()
-        return message
 
 
 def crop(image: Image):
