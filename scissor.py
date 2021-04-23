@@ -54,8 +54,6 @@ class Job:
                         )
                 except Exception as e:
                     print(e)
-                finally:
-                    imgIO.close()
             size-=(stop-current)
             current=stop
             print(f"sent {stop-current}")
