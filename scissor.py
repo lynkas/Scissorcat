@@ -33,20 +33,29 @@ class Job:
                 stop = current + size
             if size == 1:
                 imgIO = result[0]
-                message = self.update.message.reply_photo(
-                    imgIO,
-                    reply_to_message_id=self.update.message.message_id,
-                )
-                imgIO.close()
+                try:
+                    message = self.update.message.reply_photo(
+                        imgIO,
+                        reply_to_message_id=self.update.message.message_id,
+                    )
+                except Exception as e:
+                    print(e)
+                finally:
+                    imgIO.close()
             else:
                 images = [InputMediaPhoto(i) for i in result[current:stop]]
-                message = self.update.message.bot.sendMediaGroup(
-                        chat_id=self.update.message.chat_id,
-                        media=images,
-                        reply_to_message_id=self.update.message.message_id,
-                        allow_sending_without_reply=True,
-                        timeout=10,
-                    )
+                try:
+                    message = self.update.message.bot.sendMediaGroup(
+                            chat_id=self.update.message.chat_id,
+                            media=images,
+                            reply_to_message_id=self.update.message.message_id,
+                            allow_sending_without_reply=True,
+                            timeout=10,
+                        )
+                except Exception as e:
+                    print(e)
+                finally:
+                    imgIO.close()
             size-=(stop-current)
             current=stop
             print(f"sent {stop-current}")
