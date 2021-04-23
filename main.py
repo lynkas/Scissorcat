@@ -44,8 +44,9 @@ def main():
         updater.start_polling()
 
     else:
+        port = os.environ["port"]
         updater.bot.setWebhook(f"{url}/{token}")
-        updater.start_webhook(url_path=token)
+        updater.start_webhook(port=int(port),url_path=token)
     Thread(target=fileHandler.work).start()
     updater.idle()
 
