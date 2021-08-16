@@ -43,9 +43,9 @@ def main():
         updater.start_polling()
 
     else:
-        port = os.environ["port"]
+        port = os.environ["PORT"]
         # fuck it
-        updater.start_webhook(port=int(port),url_path=token,webhook_url=f"{url}/{token}",)
+        updater.start_webhook(listen="0.0.0.0", port=int(port),url_path=token,webhook_url=f"{url}/{token}",)
     Thread(target=fileHandler.work).start()
     updater.idle()
 
